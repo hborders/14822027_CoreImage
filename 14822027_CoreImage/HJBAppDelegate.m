@@ -7,43 +7,44 @@
 //
 
 #import "HJBAppDelegate.h"
+#import <CoreImage/CoreImage.h>
 
 @implementation HJBAppDelegate
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
-{
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    // Override point for customization after application launch.
     self.window.backgroundColor = [UIColor whiteColor];
+    self.window.rootViewController = [UIViewController new];
+    
+    {
+        CIVector *inputPoint0 = [CIVector vectorWithCGPoint:CGPointZero];
+        CIVector *inputPoint1 = [CIVector vectorWithCGPoint:CGPointZero];
+        
+        UIColor *fromColor = [UIColor blackColor];
+        UIColor *toColor = [UIColor whiteColor];
+        
+        CIColor *inputColor0 = [CIColor colorWithCGColor:fromColor.CGColor];
+        CIColor *inputColor1 = [CIColor colorWithCGColor:toColor.CGColor];
+        
+        CIFilter *gradientFilter = [CIFilter filterWithName:@"CILinearGradient"];
+        
+        [gradientFilter setValue:inputPoint0 forKey:@"inputPoint0"];
+        [gradientFilter setValue:inputColor0 forKey:@"inputColor0"];
+        [gradientFilter setValue:inputPoint1 forKey:@"inputPoint1"];
+        [gradientFilter setValue:inputColor1 forKey:@"inputColor1"];
+        
+        CIContext *context = [CIContext contextWithOptions:nil];
+        CIImage *gradientFilterOutputImage = [gradientFilter valueForKey: @"outputImage"];
+        
+        // Crashes on iOS7, returns NULL on iOS6
+        CGImageRef gradientRef = [context createCGImage:gradientFilterOutputImage
+                                               fromRect:CGRectZero];
+        NSLog(@"gradientRef: %p", gradientRef);
+        CGImageRelease(gradientRef);
+    }
+    
     [self.window makeKeyAndVisible];
     return YES;
-}
-
-- (void)applicationWillResignActive:(UIApplication *)application
-{
-    // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-    // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
-}
-
-- (void)applicationDidEnterBackground:(UIApplication *)application
-{
-    // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later. 
-    // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-}
-
-- (void)applicationWillEnterForeground:(UIApplication *)application
-{
-    // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
-}
-
-- (void)applicationDidBecomeActive:(UIApplication *)application
-{
-    // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-}
-
-- (void)applicationWillTerminate:(UIApplication *)application
-{
-    // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 }
 
 @end
